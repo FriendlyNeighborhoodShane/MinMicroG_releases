@@ -1,5 +1,9 @@
 # Changelog for MinMicroG
 
+### 2020.01.24
+ - Update All APKs
+ - Test fancy new autorelease system
+
 ### 2019.12.18
  - Update all APKs
  - Fix Standard bootloop on Q
