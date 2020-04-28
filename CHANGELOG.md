@@ -1,5 +1,19 @@
 # Changelog for MinMicroG
 
+### 2020.04.28
+The last  release with custom APKs made for my own satisfaction until Marvin revives microG to its former glory. With all the recent fixes made while sitting at home (thanks COVID-19!)
+
+Why you would bother flashing this:
+ - Formally put the scripts under GPLv3
+ - Added an install.md file as a handy reference manual and guide
+ - Update AuroraSuite, Play store
+ - Remove DroidGuard for obvious reasons (thanks Googs!)
+ - Replace abandoned FDroid GSM NLP backend with releases from @ploink
+ - Removed unmaintained radiocell backend that was crashing on many phones
+ - Now uses awk from MBB if you have Magisk installed
+ - Fix the (yet inexplicable) rare simple_mount bug that expanded faster than the universe (thanks advanced physics!)
+
+
 ### 2020.02.10
  - Update All APKs
  - Sync and swipe supports Q
