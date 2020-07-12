@@ -14,7 +14,7 @@ Built on my computer from MinMicroG's master using
 ```
 
 ### Why a separate repo?
-All modules have different version codes and I've never tagged in the MinMicroG repo.
+All modules have different version codes and I've never tagged in the MinMicroG repo. (You could say that MinMicroG is rolling-release.)
 
 ### On what terms are they distributed?
 Well, technically these zips are what the GPL considers 'aggregates', collections of software. So all the individual components of the zip obey their own licenses. The scripts that are part of MinMicroG are under GPLv3, under my copyright. Most of the included software is also free software, under license and copyright of their individual authors given in the zip's readme.
