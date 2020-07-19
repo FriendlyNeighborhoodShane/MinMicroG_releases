@@ -1,0 +1,6 @@
+{
+  "tag_name": "[yyyy].[mm].[dd]",
+  "target_commitish": "master",
+  "name": "[dd]th [month] [year]",
+  "body": "body\n"
+}
