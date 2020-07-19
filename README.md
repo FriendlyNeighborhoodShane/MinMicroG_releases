@@ -22,4 +22,4 @@ Well, technically these zips are what the GPL considers 'aggregates', collection
 Exception is the nonfree Google software that is packaged in the Standard edition zip.
 
 ### What's hidden inside contrib?
-Oh, nothing. Just a bunch of lazy scripts I use myself to make MinMicroG releases.
+Oh, nothing. Just a bunch of lazy scripts I use myself to make MinMicroG releases, along with a bunch of MinMicroG confs and hooks that may be interesting.

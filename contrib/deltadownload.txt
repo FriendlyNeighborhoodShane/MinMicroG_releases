@@ -1,0 +1,93 @@
+# Don't download the unchanged URLs for dynamic URL sources
+# Function to retrieve dynamic URLs before the download process
+# And trim out entries with same URL as last log from the download table
+# Unfortunately has to download repos one more time because hook is executed before repo download
+
+# pre_update_actions hook
+deltadownload() {
+
+  echo " ";
+  echo " - Checking objects whose links have been updated...";
+
+  oldlogs=""
+  for log in $(ls -t $reldir/update-*.log); do
+    oldlogs="$oldlogs $(basename "$log")";
+  done;
+  [ "$oldlogs" ] || return 0;
+
+  echo "  -- Getting repos";
+  for repo in $(echo "$stuff_repo" | select_word 1); do
+    line="$(echo "$stuff_repo" | grep -E "^[ ]*$repo[ ]+" | head -n1)";
+    repourl="$(echo "$line" | select_word 2)";
+    [ "$repourl" ] || continue;
+    curl -L --progress-bar "$repourl/index-v1.jar" -o "$tmpdir/repos/$repo.jar" || { echo "ERROR: Repo $repo failed to download" >&2; continue; }
+    [ -f "$tmpdir/repos/$repo.jar" ] || continue;
+    unzip -oq "$tmpdir/repos/$repo.jar" "index-v1.json" -d "$tmpdir/repos/";
+    [ -f "$tmpdir/repos/index-v1.json" ] || continue;
+    mv -f "$tmpdir/repos/index-v1.json" "$tmpdir/repos/$repo.json";
+    [ -f "$tmpdir/repos/$repo.json" ] || continue;
+  done;
+
+  for object in $(echo "$stuff_download" | select_word 1); do
+    line="$(echo "$stuff_download" | grep -E "^[ ]*$object[ ]+" | head -n1)";
+    source="$(echo "$line" | select_word 2)";
+    objectpath="$(echo "$line" | select_word 3)";
+    objectarg="$(echo "$line" | select_word 4)";
+    [ "$objectpath" ] || continue;
+    for log in $oldlogs; do
+      oldurl="$(grep "FILE: $object," "$reldir/$log" | grep -oE "URL: [^,;]*" | cut -d" " -f2)";
+      [ "$oldurl" ] && break;
+    done;
+    [ "$oldurl" ] && {
+      case "$source" in
+        github)
+          objecturl="$(curl -sN "https://api.github.com/repos/$objectpath/releases" | jq -r '.[].assets[].browser_download_url' | grep "$objectarg$" | head -n1)";
+        ;;
+        gitlab)
+          objectid="$(curl -sN "https://gitlab.com/$objectpath" | grep "Project ID" | head -n1 | select_word 3)";
+          [ "$objectid" ] || continue;
+          objectupload="$(curl -sN "https://gitlab.com/api/v4/projects/$objectid/repository/tags" | jq -r '.[].release.description' | grep -oE "(/uploads/[^()]*$objectarg)" | head -n1 | tr -d "()")";
+          [ "$objectupload" ] || continue;
+          objecturl="https://gitlab.com/$objectpath$objectupload";
+        ;;
+        repo)
+          objectrepo="$(dirname "$objectpath")";
+          objectpackage="$(basename "$objectpath")";
+          [ "$objectarg" ] && {
+            objectarch="$(echo "$objectarg" | sed "s|:| |g" | select_word 1)";
+            objectsdk="$(echo "$objectarg" | sed "s|:| |g" | select_word 2)";
+          }
+          [ "$objectrepo" ] && [ "$objectpackage" ] || continue;
+          [ -f "$tmpdir/repos/$objectrepo.json" ] || continue;
+          objectserver="$(jq -r '.repo.address' "$tmpdir/repos/$objectrepo.json")";
+          if [ "$objectarg" ]; then
+            objectserverfile="$(jq -r --arg pkg "$objectpackage" --arg arch "$objectarch" --arg sdk "$objectsdk" '.packages[$pkg][] | if ( $arch | length ) == 0 then . elif has ( "nativecode" ) then select ( .nativecode[]? == $arch ) else . end | if ( $sdk | length ) == 0 then . else select ( ( .minSdkVersion | tonumber ) <= ( $sdk | tonumber ) ) end | .apkName' "$tmpdir/repos/$objectrepo.json" | head -n1)";
+          else
+            objectserverfile="$(jq -r --arg pkg "$objectpackage" '.packages[$pkg][].apkName' "$tmpdir/repos/$objectrepo.json" | head -n1)";
+          fi;
+          [ "$objectserver" ] && [ "$objectserver" != "null" ] && [ "$objectserverfile" ] && [ "$objectserverfile" != "null" ] || continue;
+          objecturl="$objectserver/$objectserverfile";
+        ;;
+        *)
+          continue;
+        ;;
+      esac;
+      [ "$objecturl" = "$oldurl" ] && {
+        echo "  -- Stripping up-to-date $object";
+        stuff_download="$(echo "$stuff_download" | sed -E "s|^[ ]*$object[ ]+.*||")";
+      }
+    }
+  done;
+
+  stuff_repo_new="";
+  repo_apps="$(echo "$stuff_download" | grep -E "^[ ]*[^ ]+[ ]+repo[ ]+")";
+  for repo in $(echo "$repo_apps" | select_word 3); do
+    stuff_repo_new="$stuff_repo_new
+$(echo "$stuff_repo" | grep -E "^[ ]*$(dirname "$repo")[ ]+" | head -n1)
+";
+  done;
+  stuff_repo="$(echo "$stuff_repo_new" | sort -u)";
+
+  rm -rf "$tmpdir/repos"/*;
+
+}
