@@ -198,6 +198,7 @@ read_reply && {
   repo="friendlyneighborhoodshane/minmicrog_releases";
   token="$(cat "$workdir/token.txt")";
   auth="Authorization: token $token";
+  ghgit="https://$token@github.com/$repo.git";
   ghapi="https://api.github.com/repos/$repo/releases";
   ghupl="https://uploads.github.com/repos/$repo/releases";
 
@@ -230,7 +231,7 @@ read_reply && {
       echo "${prompta} Updating and commiting changelog...";
       # TODO quoting issues?
       sed -i "3i### $name\n$body" "$reldir/CHANGELOG.md";
-      launch_terminal "cd '$reldir'" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push" "read REPLY" || abort "Could not commit changelog!";
+      launch_terminal "cd '$reldir'" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
 
