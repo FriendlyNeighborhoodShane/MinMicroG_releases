@@ -1,5 +1,13 @@
 # Changelog for MinMicroG
 
+### 2020.07.27
+Yeehaw, official release!
+
+Changelog:
+ - Update microG
+ - Update AuroraStore
+ - Remove awk dependency completely
+
 ### 2020.04.28
 The last  release with custom APKs made for my own satisfaction until Marvin revives microG to its former glory. With all the recent fixes made while sitting at home (thanks COVID-19!)
 
