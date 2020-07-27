@@ -19,7 +19,7 @@ reldir="..";
 # Fatal error
 abort() {
   echo;
-  echo "!! FATAL: $!";
+  echo "!! FATAL: $1";
   echo;
   exit 1;
 }
