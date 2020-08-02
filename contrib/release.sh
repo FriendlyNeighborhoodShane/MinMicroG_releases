@@ -10,7 +10,7 @@ promptc="   <>";
 promptd=" !!>>";
 
 # Variables
-variantlist="aurora nogoolag standard unlp";
+variantlist="aurora minimal nogoolag standard unlp";
 workdir="$(pwd)";
 relzips="$workdir/zips";
 mmgdir="../../MinMicroG";
