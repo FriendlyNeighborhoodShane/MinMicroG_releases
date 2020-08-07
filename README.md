@@ -1,10 +1,16 @@
 # MinMicroG_releases
 Prebuilt flashable zips for the MinMicroG project
 
+The main README for the project:
+ - https://github.com/FriendlyNeighborhoodShane/MinMicroG/blob/master/README.md
+ - Also inside the zips
+
+Read the above document carefully before using any of the provided zip files.
+
 Main repo for sources and build scripts:
  - https://github.com/FriendlyNeighborhoodShane/MinMicroG
 
-You are bound by your law, your morals and your soul to to read the readme.md bundled in the zips or [here](https://github.com/FriendlyNeighborhoodShane/MinMicroG/blob/master/README.md) before flashing any of these zips.
+In the event of any damages to your device, house, ego barrier, baby, relationships, galaxy, worldview, or in general the local fabric of spacetime, I shall be held morally responsible, but in no way legally.
 
 ### How?
 Built on my computer from MinMicroG's master using
