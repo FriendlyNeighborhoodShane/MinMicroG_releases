@@ -1,5 +1,10 @@
 # Changelog for MinMicroG
 
+### 2020.10.20
+Changelog:
+ - Update MicroG and FakeStore for A11 support and COVID exposure notif APIs (if you're into that sort of thing)
+ - Updated PlayStore (Thanks setialpha!)
+
 ### 2020.07.27
 Yeehaw, official release!
 
