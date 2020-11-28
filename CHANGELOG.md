@@ -1,5 +1,13 @@
 # Changelog for MinMicroG
 
+### 2020.11.28
+Update for some minor fixes.
+
+Changelog:
+ - Update MicroG
+ - Add proper Android 11 support in standard (we have @naveenjohnsonv to thank for this!)
+ - Fix problems with addon.d and init scripts
+
 ### 2020.10.20
 Changelog:
  - Update MicroG and FakeStore for A11 support and COVID exposure notif APIs (if you're into that sort of thing)
