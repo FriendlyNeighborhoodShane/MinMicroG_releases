@@ -35,7 +35,7 @@ done;
 # Ask the user with a y/n prompt
 # TODO posix timeout using wait or something
 read_reply() {
-  read REPLY;
+  read -r REPLY;
   case "$REPLY" in
     Y*|y*)
       return 0;
@@ -73,11 +73,11 @@ launch_editor() {
 clean_repo() {
   (
     cd "$1" || return 1;
-    [ "$2" ] && {
-      git status --porcelain | grep -q "$2$" && return 1 || return 0;
-    } || {
+    if [ "$2" ]; then
+      [ "$(git status --porcelain -- "$2")" ] && return 1 || return 0;
+    else
       [ "$(git status --porcelain)" ] && return 1 || return 0;
-    }
+    fi;
   )
 }
 
@@ -166,7 +166,7 @@ while true; do
   echo "${prompta} Copying zips.."
   rm -rf "$relzips";
   mkdir "$relzips";
-  for zip in $(ls -t "$mmgdir"/releases/MinMicroG-*.zip | head -n $variants); do
+  ls -t "$mmgdir"/releases/MinMicroG-*.zip | head -n "$variants" | while read -r zip; do
     [ -f "$zip" ] && cp "$zip" "$relzips/" || abort "Could not copy zips!";
   done;
 
