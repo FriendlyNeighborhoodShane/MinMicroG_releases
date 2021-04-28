@@ -1,5 +1,12 @@
 # Changelog for MinMicroG
 
+### 2021.04.28
+Changelog:
+ - Update MicroG
+ - Update AuroraSuite
+ - Switch LocalGSM NLP backend back to the now-maintained FDroid build
+ - Support addon.d v2 for newer A/B devices
+
 ### 2020.11.28
 Update for some minor fixes.
 
