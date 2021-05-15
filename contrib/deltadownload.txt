@@ -20,7 +20,7 @@ deltadownload() {
     line="$(echo "$stuff_repo" | grep -E "^[ ]*$repo[ ]+" | head -n1)";
     repourl="$(echo "$line" | select_word 2)";
     [ "$repourl" ] || continue;
-    curl -L --progress-bar "$repourl/index-v1.jar" -o "$tmpdir/repos/$repo.jar" || { echo "ERROR: Repo $repo failed to download" >&2; continue; }
+    curl -L "$repourl/index-v1.jar" -o "$tmpdir/repos/$repo.jar" || { echo "ERROR: Repo $repo failed to download"; continue; }
     [ -f "$tmpdir/repos/$repo.jar" ] || continue;
     unzip -oq "$tmpdir/repos/$repo.jar" "index-v1.json" -d "$tmpdir/repos/";
     [ -f "$tmpdir/repos/index-v1.json" ] || continue;
@@ -44,7 +44,7 @@ deltadownload() {
           objecturl="$(curl -sN "https://api.github.com/repos/$objectpath/releases" | jq -r '.[].assets[].browser_download_url' | grep "$objectarg$" | head -n1)";
         ;;
         gitlab)
-          objectid="$(curl -sN "https://gitlab.com/$objectpath" | grep "Project ID" | head -n1 | select_word 3)";
+          objectid="$(echo "$objectpath" | jq -Rr "@uri")";
           [ "$objectid" ] || continue;
           objectupload="$(curl -sN "https://gitlab.com/api/v4/projects/$objectid/repository/tags" | jq -r '.[].release.description' | grep -oE "(/uploads/[^()]*$objectarg)" | head -n1 | tr -d "()")";
           [ "$objectupload" ] || continue;
@@ -61,7 +61,7 @@ deltadownload() {
           [ -f "$tmpdir/repos/$objectrepo.json" ] || continue;
           objectserver="$(jq -r '.repo.address' "$tmpdir/repos/$objectrepo.json")";
           if [ "$objectarg" ]; then
-            objectserverfile="$(jq -r --arg pkg "$objectpackage" --arg arch "$objectarch" --arg sdk "$objectsdk" '.packages[$pkg][] | if ( $arch | length ) == 0 then . elif has ( "nativecode" ) then select ( .nativecode[]? == $arch ) else . end | if ( $sdk | length ) == 0 then . else select ( ( .minSdkVersion | tonumber ) <= ( $sdk | tonumber ) ) end | .apkName' "$tmpdir/repos/$objectrepo.json" | head -n1)";
+            objectserverfile="$(jq -r --arg pkg "$objectpackage" --arg arch "$objectarch" --arg sdk "$objectsdk" '.packages[$pkg][] | if $arch != "" and has("nativecode") then select(.nativecode[]? == $arch) else . end | if $sdk != "" then select((.minSdkVersion|tonumber?) <= ($sdk|tonumber?)) else . end | .apkName' "$tmpdir/repos/$objectrepo.json" | head -n1)";
           else
             objectserverfile="$(jq -r --arg pkg "$objectpackage" '.packages[$pkg][].apkName' "$tmpdir/repos/$objectrepo.json" | head -n1)";
           fi;
