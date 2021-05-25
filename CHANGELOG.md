@@ -50,7 +50,7 @@ Why you would bother flashing this:
 
 ### 2020.01.27
  - Update All APKs
-  --AuroraSevices supports Q
+   - AuroraSevices supports Q
  - Fix bootloop on Pie
 
 ### 2020.01.24
