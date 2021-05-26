@@ -239,12 +239,12 @@ read_reply && {
   echo;
   echo "${prompta} Creating github release...";
   curl --data @"$relfile" -H "$auth" -H "Content-Type: application/json" "$ghapi" || abort "Could not create release";
+  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
+  [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   # Upload release
   echo;
   echo "${prompta} Uploading zips to release...";
-  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
-  [ "$id" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   for file in "$relzips"/MinMicroG-*.zip; do
 

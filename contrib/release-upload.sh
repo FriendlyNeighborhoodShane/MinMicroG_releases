@@ -39,11 +39,13 @@ done;
   tag="$1";
   shift 1;
 
+  # Get release ID
+  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
+  [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
+
   # Upload release
   echo;
   echo "${prompta} Uploading zips to release...";
-  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
-  [ "$id" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   for file in "$@"; do
 
@@ -51,7 +53,7 @@ done;
 
     # Delete old asset
     assid="$(curl -s -H "$auth" "$ghapi/$id/assets" | jq -r --arg file "$(basename "$file")" '.[] | select(.name == $file) | .id')";
-    [ "$assid" ] && [ "$assid" -gt 0 ] && {
+    [ "$assid" ] && [ "$assid" != "null" ] && [ "$assid" -gt 0 ] && {
       curl -X "DELETE" -H "$auth" "$ghapi/assets/$assid" -o /dev/null || { echo "${promptd} Deleting old asset failed!"; continue; }
     }
 
