@@ -196,7 +196,7 @@ read_reply && {
   # Release variables
   relfile="$workdir/release.json";
   repo="friendlyneighborhoodshane/minmicrog_releases";
-  token="$(cat "$workdir/token.txt")";
+  token="$GITHUB_TOKEN";
   auth="Authorization: token $token";
   ghgit="https://$token@github.com/$repo.git";
   ghapi="https://api.github.com/repos/$repo/releases";

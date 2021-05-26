@@ -15,7 +15,7 @@ workdir="$(pwd)";
 # Fatal error
 abort() {
   echo;
-  echo "!! FATAL: $!";
+  echo "!! FATAL: $1";
   echo;
   exit 1;
 }
@@ -29,7 +29,7 @@ done;
 
   # Release variables
   repo="friendlyneighborhoodshane/minmicrog_releases";
-  token="$(cat "$workdir/token.txt")";
+  token="$GITHUB_TOKEN";
   auth="Authorization: token $token";
   ghapi="https://api.github.com/repos/$repo/releases";
   ghupl="https://uploads.github.com/repos/$repo/releases";
