@@ -237,6 +237,8 @@ read_reply && {
       launch_terminal "cd '$reldir'" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
+  commit="$(git -C "$reldir" rev-parse HEAD)";
+  [ "$commit" ] || abort "Failed to get changelog commit";
 
   # Prompt for release note
   echo;
@@ -254,7 +256,7 @@ read_reply && {
   cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi" -o /dev/null || abort "Could not create release";
 {
   "tag_name": "$tag",
-  "target_commitish": "master",
+  "target_commitish": "$commit",
   "name": "$name",
   "body": $(printf '%s\n' "$body" | jq -Rsr '@json'),
   "draft": true
