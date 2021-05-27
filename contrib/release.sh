@@ -256,10 +256,11 @@ read_reply && {
   "tag_name": "$tag",
   "target_commitish": "master",
   "name": "$name",
-  "body": $(printf '%s\n' "$body" | jq -Rsr '@json')
+  "body": $(printf '%s\n' "$body" | jq -Rsr '@json'),
+  "draft": true
 }
 EOF
-  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
+  id="$(curl -s -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag and .draft == true) | .id' | tail -n1)";
   [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   # Upload release
@@ -276,6 +277,13 @@ EOF
     rm -rf "$file";
 
   done;
+
+  # Publish drafted release
+  echo;
+  echo "${prompta} Publishing github release...";
+  cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi/$id" -o /dev/null;
+{"draft":false}
+EOF
 
 }
 

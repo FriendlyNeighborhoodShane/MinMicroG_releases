@@ -40,7 +40,7 @@ done;
   shift 1;
 
   # Get release ID
-  id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
+  id="$(curl -s -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag) | .id' | tail -n1)";
   [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   # Upload release
