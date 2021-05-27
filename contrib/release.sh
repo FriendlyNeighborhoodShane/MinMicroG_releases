@@ -10,10 +10,10 @@ promptc="   <>";
 promptd=" !!>>";
 
 # Variables
-variantlist="aurora minimal minimaliap nogoolag standard unlp";
 workdir="$(pwd)";
 relzips="$workdir/zips";
 mmgdir="../../MinMicroG";
+variantlist="$(for var in "$mmgdir/conf"/defconf-*.txt; do var="$(basename "$var" ".txt")"; echo "${var#defconf-}"; done;)";
 reldir="..";
 
 # Fatal error
