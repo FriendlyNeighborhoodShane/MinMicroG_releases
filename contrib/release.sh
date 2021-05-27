@@ -197,7 +197,6 @@ printf "${promptb} Do you want to make a release? ";
 read_reply && {
 
   # Release variables
-  relfile="$workdir/release.json";
   repo="friendlyneighborhoodshane/minmicrog_releases";
   token="$GITHUB_TOKEN";
   auth="Authorization: token $token";
@@ -205,20 +204,21 @@ read_reply && {
   ghapi="https://api.github.com/repos/$repo/releases";
   ghupl="https://uploads.github.com/repos/$repo/releases";
 
-  [ -f "$relfile" ] || abort "No release file";
   [ "$token" ] || abort "No access token";
 
-  # Prompt for updating release file
-  echo;
-  printf "${promptb} Would you like to update the release file? ";
-  read_reply && launch_editor "$relfile";
+  # Set variables
+  tag="$(date +"%Y.%m.%d")";
+  name="$(date +"%d %b %Y")";
 
-  # Get variables fron json
-  tag="$(jq -r '.tag_name' "$relfile")";
-  name="$(jq -r '.name' "$relfile")";
-  body="$(jq '.body' "$relfile")";
-  body="${body##\"}";
-  body="${body%%\"}";
+  # Prompt for changelog
+  echo;
+  echo "${prompta} Please write the changelog...";
+  tmp="$(mktemp)";
+  # TODO echo template?
+  launch_terminal "cd '$mmgdir'" "$SHELL" &
+  launch_editor "$tmp";
+  changelog="$(cat "$tmp")";
+  rm -f "$tmp";
 
   # Update changelog and commit
   grep -q "^### $name" "$reldir/CHANGELOG.md" || {
@@ -233,15 +233,32 @@ read_reply && {
       echo;
       echo "${prompta} Updating and commiting changelog...";
       # TODO quoting issues?
-      sed -i "3i### $name\n$body" "$reldir/CHANGELOG.md";
+      printf '### %s\n%s\n\n' "$name" "$changelog" | sed -i '2r/dev/stdin' "$reldir/CHANGELOG.md";
       launch_terminal "cd '$reldir'" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
 
+  # Prompt for release note
+  echo;
+  echo "${prompta} Please write the release note...";
+  tmp="$(mktemp)";
+  # TODO echo template?
+  printf '%s\n' "$changelog" > "$tmp";
+  launch_editor "$tmp";
+  body="$(cat "$tmp")";
+  rm -f "$tmp";
+
   # Create release
   echo;
   echo "${prompta} Creating github release...";
-  curl --data @"$relfile" -H "$auth" -H "Content-Type: application/json" "$ghapi" || abort "Could not create release";
+  cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi" -o /dev/null || abort "Could not create release";
+{
+  "tag_name": "$tag",
+  "target_commitish": "master",
+  "name": "$name",
+  "body": $(printf '%s\n' "$body" | jq -Rsr '@json')
+}
+EOF
   id="$(curl -s -H "$auth" "$ghapi/tags/$tag" | jq -r '.id')";
   [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
