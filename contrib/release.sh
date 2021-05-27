@@ -81,6 +81,9 @@ clean_repo() {
   )
 }
 
+# Silence which errors
+which() { command which "$@" 2>/dev/null; }
+
 # Decide SHELL, TERMINAL, EDITOR
 SHELL="$SHELL";
 if [ "$TERMINAL" ]; then
