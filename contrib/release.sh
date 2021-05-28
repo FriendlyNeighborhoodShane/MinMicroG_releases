@@ -281,12 +281,24 @@ EOF
 
   done;
 
+  # Get HTML URL
+  url="$(curl -s -H "$auth" "$ghapi/$id" | jq -r '.html_url')";
+  [ "$url" ] && [ "$url" != "null" ] && {
+    echo;
+    echo "${prompta} You can find the release draft at:";
+    echo "${promptc} $url";
+  }
+
   # Publish drafted release
   echo;
-  echo "${prompta} Publishing github release...";
-  cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi/$id" -o /dev/null;
+  printf "${promptb} Do you want to publish the release? ";
+  read_reply && {
+    echo;
+    echo "${prompta} Publishing github release...";
+    cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi/$id" -o /dev/null;
 {"draft":false}
 EOF
+  }
 
 }
 
