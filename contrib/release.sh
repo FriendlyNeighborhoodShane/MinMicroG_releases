@@ -235,7 +235,7 @@ read_reply && {
       echo "${prompta} Updating and commiting changelog...";
       # TODO quoting issues?
       printf '### %s\n%s\n\n' "$name" "$changelog" | sed -i '2r/dev/stdin' "$reldir/CHANGELOG.md";
-      launch_terminal "cd '$reldir'" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
+      launch_terminal "cd '$reldir'" "git diff CHANGELOG.md" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
   commit="$(git -C "$reldir" rev-parse HEAD)";
