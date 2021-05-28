@@ -50,7 +50,7 @@ read_reply() {
 launch_terminal() {
   cmdstr="";
   for cmd in "$@"; do
-    cmd="$(echo "$cmd" | sed -e "s|\\\|\\\\\\\\|g" -e "s|'|\\\'|g" -e 's|"|\\\"|g')";
+    cmd="$(printf '%s\n' "$cmd" | sed -e "s|\\\|\\\\\\\\|g" -e "s|'|\\\'|g" -e 's|"|\\\"|g')";
     cmdstr="$cmdstr $cmd ';'";
   done;
   $TERMINAL -- $SHELL -c "eval $cmdstr";
@@ -86,6 +86,7 @@ which() { command which "$@" 2>/dev/null; }
 
 # Decide SHELL, TERMINAL, EDITOR
 SHELL="$SHELL";
+# Terminal must be able to be launch from itself or outside, and block until exit
 if [ "$TERMINAL" ]; then
   true;
 elif [ "$(which st)" ]; then
