@@ -48,24 +48,17 @@ read_reply() {
 # I am not sure if any kind of terminal returns the exit code of the program run
 # All of the || error-handling on this function might be useless after all
 launch_terminal() {
-  cmdstr="";
-  for cmd in "$@"; do
-    cmd="$(printf '%s\n' "$cmd" | sed -e "s|\\\|\\\\\\\\|g" -e "s|'|\\\'|g" -e 's|"|\\\"|g')";
-    cmdstr="$cmdstr $cmd ';'";
-  done;
-  $TERMINAL -- $SHELL -c "eval $cmdstr";
+  cmdstr="$(printf '%s; ' "$@")";
+  $TERMINAL -- $SHELL -c "$cmdstr";
 }
 
 # Open given array of files in child editor
 launch_editor() {
   if [ "$EDITOR_TYPE" = "gui" ]; then
-    $EDITOR "@";
+    $EDITOR -- "@";
   else
-    filestr="";
-    for file in "$@"; do
-      filestr="$filestr '$file'";
-    done;
-    launch_terminal "$EDITOR $filestr";
+    filestr="$(printf '"%s" ' "$@")";
+    launch_terminal "$EDITOR -- $filestr";
   fi;
 }
 
