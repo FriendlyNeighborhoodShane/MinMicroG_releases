@@ -113,7 +113,7 @@ fi;
 echo;
 printf "${promptb} Would you like to run the update script? ";
 read_reply && {
-  launch_terminal "cd '$mmgdir'" "'$mmgdir'/update.sh" "read REPLY" & pid_update="$!";
+  launch_terminal "cd '$mmgdir'" "./update.sh" "read REPLY" & pid_update="$!";
 }
 
 # Prompt for conf update
@@ -149,7 +149,7 @@ while true; do
   variants="0";
   for variant in $variantlist; do
     echo "${promptc} Running build for variant $variant...";
-    launch_terminal "cd '$mmgdir'" "'$mmgdir'/build.sh $variant" & pid_build="$pid_build $!";
+    launch_terminal "cd '$mmgdir'" "./build.sh $variant" & pid_build="$pid_build $!";
     variants="$(( variants + 1 ))";
   done;
 
