@@ -1,4 +1,7 @@
-# Don't download the unchanged URLs for dynamic URL sources
+# custom hook funcs for MinMicroG
+
+
+# deltadownload: Don't download the unchanged URLs for dynamic URL sources
 # Function to retrieve dynamic URLs before the download process
 # And trim out entries with same URL as last log from the download table
 # Unfortunately has to download repos one more time because hook is executed before repo download
@@ -89,5 +92,112 @@ $(echo "$stuff_repo" | grep -E "^[ ]*$(dirname "$repo")[ ]+" | head -n1)
   stuff_repo="$(echo "$stuff_repo_new" | sort -u)";
 
   rm -rf "$tmpdir/repos"/*;
+
+}
+
+
+# ultra_compress + ultra_extract: Use tar with gzip over main contents of zip
+# Free build and install cost with almost 0 size difference
+
+# pre_build_actions hook
+ultra_compress() {
+
+  echo "";
+  echo " - Doing ultra compression...";
+
+  (
+    cd "$tmpdir";
+    for file in ./*; do
+      [ -f "$file" ] || [ "$file" = "./META-INF" ] && continue;
+      tar cv "$file" | gzip -9 | cat > "./$file.arc" && rm -rf "$file";
+    done;
+  )
+
+}
+
+# pre_install_actions hook
+ultra_extract() {
+
+  echo "";
+  echo " - Doing ultra extraction...";
+
+  (
+    cd "$filedir";
+    for file in ./*.arc; do
+      cat "$file" | gzip -d | tar xv;
+    done;
+  )
+
+}
+
+
+# user_conf: Config system to let the user flexibly decide what they want to install
+# Helps me stay lazy
+
+# Pre-install hook
+user_conf() {
+
+  for dir in "$(dirname "$0")" "$(dirname "$zipfile")" "$moddir" "/data/adb"; do
+    [ -f "$dir/includelist.txt" ] || [ -f "$dir/excludelist.txt" ] && {
+      ui_print " ";
+      if [ -f "$dir/includelist.txt" ]; then
+        ui_print "Processing include config from $dir...";
+        includelist="$(sed -e 's|\#.*||g' -e 's|[^a-zA-Z0-9.-]| |g' "$dir/includelist.txt")";
+      else
+        ui_print "Processing exclude config from $dir...";
+        excludelist="$(sed -e 's|\#.*||g' -e 's|[^a-zA-Z0-9.-]| |g' "$dir/excludelist.txt")";
+      fi;
+      break;
+    }
+  done;
+
+  [ "$includelist" ] && {
+    new_stuff="";
+    new_stuff_arch="";
+    new_stuff_sdk="";
+    new_stuff_arch_sdk="";
+    for include in $includelist; do
+      log "Including keyword $include";
+      new_stuff="$new_stuff $(echo "$stuff" | grep -oi "[ ]*[^ ]*$include[^ ]*[ ]*")";
+      new_stuff_arch="$new_stuff_arch $(echo "$stuff_arch" | grep -oi "[ ]*[^ ]*$include[^ ]*[ ]*")";
+      new_stuff_sdk="$new_stuff_sdk $(echo "$stuff_sdk" | grep -oi "[ ]*[^ ]*$include[^ ]*[ ]*")";
+      new_stuff_arch_sdk="$new_stuff_arch_sdk $(echo "$stuff_arch_sdk" | grep -oi "[ ]*[^ ]*$include[^ ]*[ ]*")";
+    done;
+    stuff="$new_stuff";
+    stuff_arch="$new_stuff_arch";
+    stuff_sdk="$new_stuff_sdk";
+    stuff_arch_sdk="$new_stuff_arch_sdk";
+  }
+
+  [ "$excludelist" ] && {
+    new_stuff="$stuff";
+    new_stuff_arch="$stuff_arch";
+    new_stuff_sdk="$stuff_sdk";
+    new_stuff_arch_sdk="$stuff_arch_sdk";
+    for exclude in $excludelist; do
+      log "Including keyword $include";
+      new_stuff="$(echo "$new_stuff" | sed "s|[ ]*[^ ]*$exclude[^ ]*[ ]*| |ig")";
+      new_stuff_arch="$(echo "$new_stuff_arch" | sed "s|[ ]*[^ ]*$exclude[^ ]*[ ]*| |ig")";
+      new_stuff_sdk="$(echo "$new_stuff_sdk" | sed "s|[ ]*[^ ]*$exclude[^ ]*[ ]*| |ig")";
+      new_stuff_arch_sdk="$(echo "$new_stuff_arch_sdk" | sed "s|[ ]*[^ ]*$exclude[^ ]*[ ]*| |ig")";
+    done;
+    stuff="$new_stuff";
+    stuff_arch="$new_stuff_arch";
+    stuff_sdk="$new_stuff_sdk";
+    stuff_arch_sdk="$new_stuff_arch_sdk";
+  }
+
+  [ "$includelist" ] || [ "$excludelist" ] && {
+    stuff="$(echo "$stuff" | sed 's| |\n|g' | tr -s '\n' | sort -u | sed 's|^|  |g')
+";
+    stuff_arch="$(echo "$stuff_arch" | sed 's| |\n|g' | tr -s '\n' | sort -u | sed 's|^|  |g')
+";
+    stuff_sdk="$(echo "$stuff_sdk" | sed 's| |\n|g' | tr -s '\n' | sort -u | sed 's|^|  |g')
+";
+    stuff_arch_sdk="$(echo "$stuff_arch_sdk" | sed 's| |\n|g' | tr -s '\n' | sort -u | sed 's|^|  |g')
+";
+  }
+
+  [ "$stuff" ] || [ "$stuff_arch" ] || [ "$stuff_sdk" ] || [ "$stuff_arch_sdk" ] || abort "Nothing left to install after config";
 
 }
