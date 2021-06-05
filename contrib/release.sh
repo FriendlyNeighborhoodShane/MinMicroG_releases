@@ -166,6 +166,7 @@ while true; do
   ls -t "$mmgdir"/releases/MinMicroG-*.zip | head -n "$variants" | while read -r zip; do
     [ -f "$zip" ] && cp "$zip" "$relzips/" || abort "Could not copy zips!";
   done;
+  (cd "$mmgdir/resdl/util/certs"; tar cz .;) > "$relzips/certs.tar.gz";
 
   # Prompt for zip testing
   echo;
@@ -263,7 +264,7 @@ EOF
   echo;
   echo "${prompta} Uploading zips to release...";
 
-  for file in "$relzips"/MinMicroG-*.zip; do
+  for file in "$relzips"/*; do
 
     echo "${promptc} Uploading $(basename "$file")";
 
