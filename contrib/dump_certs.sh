@@ -64,9 +64,9 @@ mkdir -p "$tmpdir";
 # Verify certs
 {
 
-  command -v "jarsigner" >/dev/null && command -v "openssl" >/dev/null || {
+  command -v "apksigner" >/dev/null && command -v "openssl" >/dev/null || {
     echo " ";
-    echo " !! Not checking certificates (missing jarsigner or openssl)";
+    echo " !! Not checking certificates (missing apksigner or openssl)";
     return 0;
   }
 
@@ -77,7 +77,7 @@ mkdir -p "$tmpdir";
 
   for object in $(find -H "$resdldir/system" -type f -name "*.apk" | sed "s|^$resdldir||g"); do
     certobject="$(dirname "$object")/$(basename "$object" .apk).cer";
-    unzip -l "$resdldir/$object" "META-INF/*" | grep -q "META-INF/.*.RSA" && jarsigner -verify "$resdldir/$object" > /dev/null || {
+    apksigner verify "$resdldir/$object" > /dev/null || {
       echo "  !! Verification failed for APK ($object)" >&2;
       continue;
     }
