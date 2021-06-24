@@ -25,7 +25,7 @@ abort() {
 }
 
 # Bincheck
-for bin in curl jq; do
+for bin in curl date jq; do
   [ "$(which "$bin")" ] || abort "Missing dependency: $bin"
 done;
 
@@ -127,8 +127,12 @@ read_reply && {
     echo "${promptd} The repository is not clean. Please clean it first.";
     launch_terminal "cd '$mmgdir'" "$SHELL";
   done;
-  launch_editor "$mmgdir"/conf/defconf-*.txt;
-  launch_terminal "cd '$mmgdir'" "git add conf/defconf-*.txt" "git commit -m 'Update confs'" "git push" "read REPLY" || abort "Could not commit confs!";
+  launch_terminal "cd '$mmgdir'" "$SHELL";
+  printf "${promptb} Please enter new {ver} value: ";
+  read -r ver;
+  printf "${promptb} Please enter new {verc} value: ";
+  read -r verc;
+  launch_terminal "cd '$mmgdir'" "./bump.sh '$ver' '$verc' '$(date -u +'%d %B, %Y')'" "git add conf/defconf-*.txt" "git commit -m 'Update confs'" "git push" "read REPLY" || abort "Could not commit confs!";
 }
 
 # Wait for update process
