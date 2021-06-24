@@ -26,7 +26,7 @@ abort() {
 
 # Bincheck
 for bin in curl date jq; do
-  [ "$(which "$bin")" ] || abort "Missing dependency: $bin"
+  command -v "$bin" >/dev/null || abort "Missing dependency: $bin"
 done;
 
 # Dircheck
@@ -74,35 +74,32 @@ clean_repo() {
   )
 }
 
-# Silence which errors
-which() { command which "$@" 2>/dev/null; }
-
 # Decide SHELL, TERMINAL, EDITOR
 SHELL="$SHELL";
 # Terminal must be able to be launch from itself or outside, and block until exit
 if [ "$TERMINAL" ]; then
   true;
-elif [ "$(which st)" ]; then
+elif command -v "st" >/dev/null; then
   TERMINAL="st";
-elif [ "$(which konsole)" ]; then
+elif command -v "konsole" >/dev/null; then
   TERMINAL="konsole";
-elif [ "$(which mintty)" ]; then
+elif command -v "mintty" >/dev/null; then
   TERMINAL="mintty --nodaemon";
 else
   abort "No known terminal found!";
 fi;
 if [ "$EDITOR" ] && [ "$EDITOR_TYPE" ]; then
   true;
-elif [ "$(which kate)" ]; then
+elif command -v "kate" >/dev/null; then
   EDITOR="kate";
   EDITOR_TYPE="gui";
-elif [ "$(which nano)" ]; then
+elif command -v "nano" >/dev/null; then
   EDITOR="nano";
   EDITOR_TYPE="cli";
-elif [ "$(which vim)" ]; then
+elif command -v "vim" >/dev/null; then
   EDITOR="vim";
   EDITOR_TYPE="cli";
-elif [ "$(which vi)" ]; then
+elif command -v "vi" >/dev/null; then
   EDITOR="vi";
   EDITOR_TYPE="cli";
 else

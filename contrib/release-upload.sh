@@ -22,7 +22,7 @@ abort() {
 
 # Bincheck
 for bin in curl jq; do
-  [ "$(which "$bin")" ] || abort "Missing dependency: $bin"
+  command -v "$bin" >/dev/null || abort "Missing dependency: $bin"
 done;
 
 {

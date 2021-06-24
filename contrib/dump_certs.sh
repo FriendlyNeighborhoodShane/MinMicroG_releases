@@ -43,7 +43,7 @@ echo "--         No, not the Official one         --";
 
 # Bin check
 for bin in cp grep rm unzip; do
-  [ "$(which $bin)" ] || abort "No $bin found";
+  command -v "$bin" >/dev/null || abort "No $bin found";
 done;
 
 echo " ";
@@ -64,7 +64,7 @@ mkdir -p "$tmpdir";
 # Verify certs
 {
 
-  [ "$(which jarsigner)" ] && [ "$(which openssl)" ] || {
+  command -v "jarsigner" >/dev/null && command -v "openssl" >/dev/null || {
     echo " ";
     echo " !! Not checking certificates (missing jarsigner or openssl)";
     return 0;
