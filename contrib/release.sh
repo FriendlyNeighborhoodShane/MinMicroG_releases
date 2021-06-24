@@ -13,7 +13,7 @@ promptd=" !!>>";
 workdir="$(pwd)";
 relzips="$workdir/zips";
 mmgdir="../../MinMicroG";
-variantlist="$(for var in "$mmgdir/conf"/defconf-*.txt; do var="$(basename "$var" ".txt")"; echo "${var#defconf-}"; done;)";
+variantlist="$(find "$mmgdir/conf" -type f -name "defconf-*.txt" -exec expr {} : ".*/defconf-\(.*\)\.txt$" ';')";
 reldir="..";
 
 # Fatal error
@@ -164,7 +164,8 @@ while true; do
   echo "${prompta} Copying zips.."
   rm -rf "$relzips";
   mkdir "$relzips";
-  ls -t "$mmgdir"/releases/MinMicroG-*.zip | head -n "$variants" | while read -r zip; do
+  find "$mmgdir/releases" -type f -name "MinMicroG-*-*.zip" -exec expr {} : ".*/MinMicroG-.*-\([0-9]\{14\}\)\.zip$" ';' | sort -nr | head -n "$variants" | while read -r time; do
+    zip="$( (set -- "$mmgdir/releases"/MinMicroG-*-$time.zip; echo "$1";) )";
     [ -f "$zip" ] && cp "$zip" "$relzips/" || abort "Could not copy zips!";
   done;
   (cd "$mmgdir/resdl/util/certs"; tar cz .;) > "$relzips/certs.tar.gz";

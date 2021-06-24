@@ -12,10 +12,7 @@ deltadownload() {
   echo " ";
   echo " - Checking objects whose links have been updated...";
 
-  oldlogs=""
-  for log in $(ls -t $reldir/update-*.log); do
-    oldlogs="$oldlogs $(basename "$log")";
-  done;
+  oldlogs="$(find "$reldir" -type f -name "update-*.log" -exec expr {} : ".*/update-\([0-9]\{14\}\)\.log$" ';' | sort -nr)";
   [ "$oldlogs" ] || return 0;
 
   echo "  -- Getting repos";
@@ -38,7 +35,7 @@ deltadownload() {
     objectarg="$(echo "$line" | select_word 4)";
     [ "$objectpath" ] || continue;
     for log in $oldlogs; do
-      oldurl="$(grep "FILE: $object," "$reldir/$log" | grep -oE "URL: [^,;]*" | cut -d" " -f2)";
+      oldurl="$(grep "FILE: $object," "$reldir/update-$log.log" | grep -oE "URL: [^,;]*" | cut -d" " -f2)";
       [ "$oldurl" ] && break;
     done;
     [ "$oldurl" ] && {
@@ -106,7 +103,7 @@ ultra_compress() {
   echo " - Doing ultra compression...";
 
   (
-    cd "$tmpdir";
+    cd "$tmpdir" || abort "Could not cd";
     for file in ./*; do
       [ -f "$file" ] || [ "$file" = "./META-INF" ] && continue;
       tar cv "$file" | gzip -9 | cat > "./$file.arc" && rm -rf "$file";
@@ -122,7 +119,7 @@ ultra_extract() {
   echo " - Doing ultra extraction...";
 
   (
-    cd "$filedir";
+    cd "$filedir" || abort "Could not cd";
     for file in ./*.arc; do
       cat "$file" | gzip -d | tar xv;
     done;
