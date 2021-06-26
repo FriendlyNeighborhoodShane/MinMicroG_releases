@@ -34,10 +34,12 @@ deltadownload() {
     objectpath="$(echo "$line" | select_word 3)";
     objectarg="$(echo "$line" | select_word 4)";
     [ "$objectpath" ] || continue;
+    oldline="";
     for log in $oldlogs; do
-      oldurl="$(grep "FILE: $object," "$reldir/update-$log.log" | grep -oE "URL: [^,;]*" | cut -d" " -f2)";
-      [ "$oldurl" ] && break;
+      oldline="$(grep "FILE: $object[,;]" "$reldir/update-$log.log" | head -n1)";
+      [ "$oldline" ] && break;
     done;
+    oldurl="$(echo "$oldline" | grep -oE "URL: [^,;]*" | cut -d" " -f2)";
     [ "$oldurl" ] && {
       case "$source" in
         github)
