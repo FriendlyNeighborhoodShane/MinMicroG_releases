@@ -250,7 +250,7 @@ read_reply && {
   # Create release
   echo;
   echo "${prompta} Creating github release...";
-  cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi" -o /dev/null || abort "Could not create release";
+  cat <<EOF | curl -f --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi" -o /dev/null || abort "Could not create release";
 {
   "tag_name": "$tag",
   "target_commitish": "$commit",
@@ -259,7 +259,7 @@ read_reply && {
   "draft": true
 }
 EOF
-  id="$(curl -s -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag and .draft == true) | .id' | tail -n1)";
+  id="$(curl -fs -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag and .draft == true) | .id' | tail -n1)";
   [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   # Upload release
@@ -272,13 +272,13 @@ EOF
 
     # Upload asset
     ghass="$ghupl/$id/assets?name=$(basename "$file")";
-    curl --data-binary @"$file" -H "$auth" -H "Content-Type: application/octet-stream" "$ghass" -o /dev/null || { echo "${promptd} Uploading failed!"; continue; }
+    curl -f --data-binary @"$file" -H "$auth" -H "Content-Type: application/octet-stream" "$ghass" -o /dev/null || { echo "${promptd} Uploading failed!"; continue; }
     rm -rf "$file";
 
   done;
 
   # Get HTML URL
-  url="$(curl -s -H "$auth" "$ghapi/$id" | jq -r '.html_url')";
+  url="$(curl -fs -H "$auth" "$ghapi/$id" | jq -r '.html_url')";
   [ "$url" ] && [ "$url" != "null" ] && {
     echo;
     echo "${prompta} You can find the release draft at:";
@@ -291,7 +291,7 @@ EOF
   read_reply && {
     echo;
     echo "${prompta} Publishing github release...";
-    cat <<EOF | curl --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi/$id" -o /dev/null;
+    cat <<EOF | curl -f --data "@-" -H "$auth" -H "Content-Type: application/json" "$ghapi/$id" -o /dev/null;
 {"draft":false}
 EOF
   }

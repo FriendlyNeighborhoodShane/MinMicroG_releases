@@ -40,7 +40,7 @@ done;
   shift 1;
 
   # Get release ID
-  id="$(curl -s -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag) | .id' | tail -n1)";
+  id="$(curl -fs -H "$auth" "$ghapi" | jq -r --arg tag "$tag" '. | sort_by(.created_at) | .[] | select(.tag_name == $tag) | .id' | tail -n1)";
   [ "$id" ] && [ "$id" != "null" ] && [ "$id" -gt 0 ] || abort "Failed to get release id";
 
   # Upload release
@@ -52,14 +52,14 @@ done;
     echo "${promptc} Uploading $(basename "$file")";
 
     # Delete old asset
-    assid="$(curl -s -H "$auth" "$ghapi/$id/assets" | jq -r --arg file "$(basename "$file")" '.[] | select(.name == $file) | .id')";
+    assid="$(curl -fs -H "$auth" "$ghapi/$id/assets" | jq -r --arg file "$(basename "$file")" '.[] | select(.name == $file) | .id')";
     [ "$assid" ] && [ "$assid" != "null" ] && [ "$assid" -gt 0 ] && {
-      curl -X "DELETE" -H "$auth" "$ghapi/assets/$assid" -o /dev/null || { echo "${promptd} Deleting old asset failed!"; continue; }
+      curl -f -X "DELETE" -H "$auth" "$ghapi/assets/$assid" -o /dev/null || { echo "${promptd} Deleting old asset failed!"; continue; }
     }
 
     # Upload asset
     ghass="$ghupl/$id/assets?name=$(basename "$file")";
-    curl --data-binary @"$file" -H "$auth" -H "Content-Type: application/octet-stream" "$ghass" -o /dev/null || { echo "${promptd} Uploading asset failed!"; continue; }
+    curl -f --data-binary @"$file" -H "$auth" -H "Content-Type: application/octet-stream" "$ghass" -o /dev/null || { echo "${promptd} Uploading asset failed!"; continue; }
     rm -rf "$file";
 
   done;

@@ -20,7 +20,7 @@ deltadownload() {
     line="$(echo "$stuff_repo" | grep -E "^[ ]*$repo[ ]+" | head -n1)";
     repourl="$(echo "$line" | select_word 2)";
     [ "$repourl" ] || continue;
-    curl -L "$repourl/index-v1.jar" -o "$tmpdir/repos/$repo.jar" || { echo "ERROR: Repo $repo failed to download"; continue; }
+    curl -fL "$repourl/index-v1.jar" -o "$tmpdir/repos/$repo.jar" || { echo "ERROR: Repo $repo failed to download"; continue; }
     [ -f "$tmpdir/repos/$repo.jar" ] || continue;
     unzip -oq "$tmpdir/repos/$repo.jar" "index-v1.json" -d "$tmpdir/repos/";
     [ -f "$tmpdir/repos/index-v1.json" ] || continue;
@@ -43,12 +43,12 @@ deltadownload() {
     [ "$oldurl" ] && {
       case "$source" in
         github)
-          objecturl="$(curl -sN "https://api.github.com/repos/$objectpath/releases" | jq -r '.[].assets[].browser_download_url' | grep "$objectarg$" | head -n1)";
+          objecturl="$(curl -fs "https://api.github.com/repos/$objectpath/releases" | jq -r '.[].assets[].browser_download_url' | grep "$objectarg$" | head -n1)";
         ;;
         gitlab)
           objectid="$(echo "$objectpath" | jq -Rr "@uri")";
           [ "$objectid" ] || continue;
-          objectupload="$(curl -sN "https://gitlab.com/api/v4/projects/$objectid/repository/tags" | jq -r '.[].release.description' | grep -oE "(/uploads/[^()]*$objectarg)" | head -n1 | tr -d "()")";
+          objectupload="$(curl -fs "https://gitlab.com/api/v4/projects/$objectid/repository/tags" | jq -r '.[].release.description' | grep -oE "(/uploads/[^()]*$objectarg)" | head -n1 | tr -d "()")";
           [ "$objectupload" ] || continue;
           objecturl="https://gitlab.com/$objectpath$objectupload";
         ;;
