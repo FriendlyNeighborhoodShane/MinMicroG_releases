@@ -10,6 +10,7 @@ promptc="   <>";
 promptd=" !!>>";
 
 # Variables
+reply_timeout="15";
 workdir="$(pwd)";
 relzips="$workdir/zips";
 mmgdir="../../MinMicroG";
@@ -33,9 +34,21 @@ done;
 [ -d "$mmgdir" ] && [ -d "$reldir" ] || abort "Directories not set up";
 
 # Ask the user with a y/n prompt
-# TODO posix timeout using wait or something
 read_reply() {
-  read -r REPLY;
+  # POSIX emulation of read -t
+  # Bit hacky but works out perfectly
+  # Some shell may unavoidably print 'Terminated\n' in the timeout case
+  REPLY="$( (
+    pid="$($SHELL -c 'echo $PPID')";
+    (
+      sleep "$reply_timeout" & spid="$!";
+      trap 'kill "$spid"' TERM;
+      wait "$spid"; kill "$pid";
+    ) & dpid="$!";
+    read -r REPLY;
+    printf '%s\n' "$REPLY";
+    kill "$dpid";
+  ) )";
   case "$REPLY" in
     Y*|y*)
       return 0;
