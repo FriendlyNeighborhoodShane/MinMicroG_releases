@@ -44,24 +44,6 @@ read_reply() {
   return 1;
 }
 
-# Launch given array of commands in child terminal
-# I am not sure if any kind of terminal returns the exit code of the program run
-# All of the || error-handling on this function might be useless after all
-launch_terminal() {
-  cmdstr="$(printf '%s; ' "$@")";
-  $TERMINAL -- $SHELL -c "$cmdstr";
-}
-
-# Open given array of files in child editor
-launch_editor() {
-  if [ "$EDITOR_TYPE" = "gui" ]; then
-    $EDITOR -- "@";
-  else
-    filestr="$(printf '"%s" ' "$@")";
-    launch_terminal "$EDITOR -- $filestr";
-  fi;
-}
-
 # Check if git repo is clean
 clean_repo() {
   (
@@ -74,34 +56,58 @@ clean_repo() {
   )
 }
 
-# Decide SHELL, TERMINAL, EDITOR
-SHELL="$SHELL";
+# Launch given array of commands in child terminal
 # Terminal must be able to be launch from itself or outside, and block until exit
-if [ "$TERMINAL" ]; then
-  true;
+# I am not sure if any kind of terminal returns the exit code of the program run
+# All of the || error-handling on this function might be useless after all
+if false; then
+  :;
 elif command -v "st" >/dev/null; then
-  TERMINAL="st";
+  launch_terminal() {
+    cmdstr="$(printf '%s; ' "$@")";
+    st -- $SHELL -c "$cmdstr";
+  }
 elif command -v "konsole" >/dev/null; then
-  TERMINAL="konsole";
+  launch_terminal() {
+    cmdstr="$(printf '%s; ' "$@")";
+    konsole -- $SHELL -c "$cmdstr";
+  }
 elif command -v "mintty" >/dev/null; then
-  TERMINAL="mintty --nodaemon";
+  launch_terminal() {
+    cmdstr="$(printf '%s; ' "$@")";
+    mintty --nodaemon -- $SHELL -c "$cmdstr";
+  }
 else
   abort "No known terminal found!";
 fi;
-if [ "$EDITOR" ] && [ "$EDITOR_TYPE" ]; then
-  true;
+
+# Open given array of files in child editor
+# Can launch directly or through a terminal using launch_terminal
+if false; then
+  :;
 elif command -v "kate" >/dev/null; then
-  EDITOR="kate";
-  EDITOR_TYPE="gui";
+  launch_editor() {
+    kate -- "@";
+  }
+elif command -v "notepad++" >/dev/null; then
+  launch_editor() {
+    notepad++ -- "$@";
+  }
 elif command -v "nano" >/dev/null; then
-  EDITOR="nano";
-  EDITOR_TYPE="cli";
+  launch_editor() {
+    filestr="$(printf '"%s" ' "$@")";
+    launch_terminal "nano -- $filestr";
+  }
 elif command -v "vim" >/dev/null; then
-  EDITOR="vim";
-  EDITOR_TYPE="cli";
+  launch_editor() {
+    filestr="$(printf '"%s" ' "$@")";
+    launch_terminal "vim -- $filestr";
+  }
 elif command -v "vi" >/dev/null; then
-  EDITOR="vi";
-  EDITOR_TYPE="cli";
+  launch_editor() {
+    filestr="$(printf '"%s" ' "$@")";
+    launch_terminal "vi -- $filestr";
+  }
 else
   abort "No known editor found!";
 fi;
