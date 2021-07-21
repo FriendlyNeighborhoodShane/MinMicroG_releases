@@ -248,7 +248,7 @@ read_reply && {
       done;
       echo;
       echo "${prompta} Updating and commiting changelog...";
-      printf '### %s\n%s\n\n' "$name" "$changelog" | sed -i '2r/dev/stdin' "$reldir/CHANGELOG.md";
+      printf '### %s\n%s\n\n' "$name" "$changelog" | sed -i '2r /dev/stdin' "$reldir/CHANGELOG.md";
       launch_terminal "cd '$reldir'" "git diff CHANGELOG.md" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
