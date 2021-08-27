@@ -143,7 +143,7 @@ read_reply && {
     echo "${promptd} The repository is not clean. Please clean it first.";
     launch_terminal "cd '$mmgdir'" "$SHELL";
   done;
-  launch_terminal "cd '$mmgdir'" "$SHELL";
+  launch_terminal "cd '$mmgdir'" "git grep -e '^ver=' -e '^verc=' -e '^date=' -- conf/defconf-*.txt" "read REPLY" &
   printf "${promptb} Please enter new {ver} value: ";
   read -r ver;
   printf "${promptb} Please enter new {verc} value: ";
