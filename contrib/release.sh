@@ -183,7 +183,7 @@ while true; do
   echo "${prompta} Copying zips.."
   rm -rf "$relzips";
   mkdir "$relzips";
-  find "$mmgdir/releases" -type f -name "MinMicroG-*-*.zip" -exec expr {} : ".*/MinMicroG-.*-\([0-9]\{14\}\)\.zip$" ';' | sort -nr | head -n "$variants" | while read -r time; do
+  find -L "$mmgdir/releases" -type f -name "MinMicroG-*-*.zip" -exec expr {} : ".*/MinMicroG-.*-\([0-9]\{14\}\)\.zip$" ';' | sort -nr | head -n "$variants" | while read -r time; do
     zip="$( (set -- "$mmgdir/releases"/MinMicroG-*-$time.zip; echo "$1";) )";
     [ -f "$zip" ] && cp "$zip" "$relzips/" || abort "Could not copy zips!";
   done;
