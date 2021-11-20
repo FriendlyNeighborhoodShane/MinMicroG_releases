@@ -5,6 +5,7 @@
 # Function to retrieve dynamic URLs before the download process
 # And trim out entries with same URL as last log from the download table
 # Unfortunately has to download repos one more time because hook is executed before repo download
+# Requires stat and non-POSIX date to interpret timestamps as epoch
 
 # pre_update_actions hook
 deltadownload() {
@@ -71,11 +72,22 @@ deltadownload() {
           [ "$objectserver" ] && [ "$objectserver" != "null" ] && [ "$objectserverfile" ] && [ "$objectserverfile" != "null" ] || continue;
           objecturl="$objectserver/$objectserverfile";
         ;;
+        direct)
+          objecturl="$objectpath";
+        ;;
         *)
           continue;
         ;;
       esac;
       [ "$objecturl" = "$oldurl" ] || continue;
+      headers="$(curl -fLs --head "$objecturl" | dos2unix | grep -i -e 'last-modified: ' -e '^content-length: ')";
+      remotedate="$(echo "$headers" | grep -i '^last-modified: ' | sed 's|^last-modified: ||i' | tail -n1)";
+      remotedate="$(date -d "$remotedate" +"%s")";
+      remotesize="$(echo "$headers" | grep -i '^content-length: ' | sed 's|^content-length: ||i' | tail -n1)";
+      [ "$remotedate" ] && [ "$remotesize" ] || continue;
+      localdate="$(stat -c '%Y' "$resdldir/$object")";
+      localsize="$(stat -c '%s' "$resdldir/$object")";
+      [ "$remotedate" -lt "$localdate" ] && [ "$remotesize" = "$localsize" ] || continue;
       [ "$MMG_NODELTA" ] || {
         echo "  -- Stripping up-to-date $object";
         stuff_download="$(echo "$stuff_download" | sed -E "s|^[ ]*$object[ ]+.*||")";
