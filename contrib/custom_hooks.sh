@@ -12,7 +12,7 @@ deltadownload() {
   echo " ";
   echo " - Checking objects whose links have been updated...";
 
-  oldlogs="$(find —L "$reldir" -type f -name "update-*.log" -exec expr {} : ".*/update-\([0-9]\{14\}\)\.log$" ';' | sort -nr)";
+  oldlogs="$(find -L "$reldir" -type f -name "update-*.log" -exec expr {} : ".*/update-\([0-9]\{14\}\)\.log$" ';' | sort -nr)";
   [ "$oldlogs" ] || return 0;
 
   echo "  -- Getting repos";
