@@ -29,6 +29,7 @@ deltadownload() {
   done;
 
   for object in $(echo "$stuff_download" | select_word 1); do
+    [ -f "$resdldir/$object" ] || continue;
     line="$(echo "$stuff_download" | grep -E "^[ ]*$object[ ]+" | head -n1)";
     source="$(echo "$line" | select_word 2)";
     objectpath="$(echo "$line" | select_word 3)";
@@ -74,7 +75,8 @@ deltadownload() {
           continue;
         ;;
       esac;
-      [ "$objecturl" = "$oldurl" ] && {
+      [ "$objecturl" = "$oldurl" ] || continue;
+      [ "$MMG_NODELTA" ] || {
         echo "  -- Stripping up-to-date $object";
         stuff_download="$(echo "$stuff_download" | sed -E "s|^[ ]*$object[ ]+.*||")";
       }
