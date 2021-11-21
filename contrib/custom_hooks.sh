@@ -80,7 +80,7 @@ deltadownload() {
         ;;
       esac;
       [ "$objecturl" = "$oldurl" ] || continue;
-      headers="$(curl -fLs --head "$objecturl" | dos2unix | grep -i -e 'last-modified: ' -e '^content-length: ')";
+      headers="$(curl -fLs --head "$objecturl" | dos2unix | grep -i -e '^last-modified: ' -e '^content-length: ')";
       remotedate="$(echo "$headers" | grep -i '^last-modified: ' | sed 's|^last-modified: ||i' | tail -n1)";
       remotedate="$(date -d "$remotedate" +"%s")";
       remotesize="$(echo "$headers" | grep -i '^content-length: ' | sed 's|^content-length: ||i' | tail -n1)";
