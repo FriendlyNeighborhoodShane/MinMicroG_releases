@@ -1,5 +1,15 @@
 # Changelog for MinMicroG
 
+### 2022.01.26
+Changelog:
+ - Updated microG (0.2.23)
+ - Updated Aurora Store
+ - Updated LocalGSM NLP backend
+ - Improvements to npem, including:
+   - running rootless through ADB
+   - fixing microg priv-perms by user-installing
+ - Added Contact Sync Adapters upto Android R
+
 ### 2021.04.28
 Changelog:
  - Update MicroG
