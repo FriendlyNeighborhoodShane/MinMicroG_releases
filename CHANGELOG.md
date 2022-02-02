@@ -1,5 +1,9 @@
 # Changelog for MinMicroG
 
+### 2022.02.02
+ - Update microG (0.2.24)
+ - Fix npem regression
+
 ### 2022.01.26
 Changelog:
  - Updated microG (0.2.23)
