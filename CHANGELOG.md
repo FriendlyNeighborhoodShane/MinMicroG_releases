@@ -1,5 +1,18 @@
 # Changelog for MinMicroG
 
+### 2023.07.29
+ - Update microG (v0.2.28.231657)
+ - Switch Playstore to unpatched vanilla and update (v30.4.21)
+ - Update Aurora Store (v4.2.5)
+ - Update Fakestore (v0.2.0)
+ - Add sync adapters for Android S-T
+ - Drop all NLP backends
+ - Drop standalone UNLP
+ - Drop Google DRM jars and swype libs
+ - Drom AuroraServices from Standard and Nogoolag packages
+ - Squash dynamic system install bugs
+ - Add addon packages for Aurora Services and Playstore
+
 ### 2022.02.02
  - Update microG (0.2.24)
  - Fix npem regression
