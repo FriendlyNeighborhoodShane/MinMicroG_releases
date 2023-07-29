@@ -64,9 +64,9 @@ mkdir -p "$tmpdir";
 # Verify certs
 {
 
-  command -v "apksigner" >/dev/null && command -v "openssl" >/dev/null || {
+  command -v "apksigner" >/dev/null || {
     echo " ";
-    echo " !! Not checking certificates (missing apksigner or openssl)";
+    echo " !! Not checking certificates (missing apksigner)";
     return 0;
   }
 
@@ -84,10 +84,10 @@ mkdir -p "$tmpdir";
     [ -f "$certdir/$certobject" ] || {
       echo "  -- Adding cert for new APK ($object)";
       mkdir -p "$certdir/$(dirname "$certobject")";
-      unzip -p "$resdldir/$object" "META-INF/*.RSA" | openssl pkcs7 -inform der -print_certs > "$certdir/$certobject";
+      apksigner verify --print-certs-pem "$resdldir/$object" | grep -v '^WARNING: ' > "$certdir/$certobject";
       continue;
     }
-    unzip -p "$resdldir/$object" "META-INF/*.RSA" | openssl pkcs7 -inform der -print_certs > "$tmpdir/tmp.cer";
+    apksigner verify --print-certs-pem "$resdldir/$object" | grep -v '^WARNING: ' > "$tmpdir/tmp.cer";
     [ "$(diff -w "$tmpdir/tmp.cer" "$certdir/$certobject")" ] && {
       echo "  !! Cert mismatch for APK ($object)" >&2;
       cp -f "$tmpdir/tmp.cer" "$certdir/$certobject.new";
