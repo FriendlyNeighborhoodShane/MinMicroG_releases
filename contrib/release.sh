@@ -84,20 +84,26 @@ clean_repo() {
 # All of the || error-handling on this function might be useless after all
 if false; then
   :;
+elif command -v "alacritty" >/dev/null; then
+  launch_terminal() {
+    cmdstr="$(printf '%s; ' "$@")";
+    alacritty -e "$SHELL" -c "$cmdstr";
+  }
 elif command -v "st" >/dev/null; then
   launch_terminal() {
     cmdstr="$(printf '%s; ' "$@")";
-    st -- $SHELL -c "$cmdstr";
+    st -e "$SHELL" -c "$cmdstr";
   }
 elif command -v "konsole" >/dev/null; then
   launch_terminal() {
     cmdstr="$(printf '%s; ' "$@")";
-    konsole -- $SHELL -c "$cmdstr";
+    # misbehaves: unavoidably substitutes some env variables even before passing to shell
+    konsole -e "$SHELL" -c "$cmdstr";
   }
 elif command -v "mintty" >/dev/null; then
   launch_terminal() {
     cmdstr="$(printf '%s; ' "$@")";
-    mintty --nodaemon -- $SHELL -c "$cmdstr";
+    mintty --nodaemon -e "$SHELL" -c "$cmdstr";
   }
 else
   abort "No known terminal found!";
