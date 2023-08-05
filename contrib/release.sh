@@ -33,6 +33,15 @@ done;
 # Dircheck
 [ -d "$mmgdir" ] && [ -d "$reldir" ] || abort "Directories not set up";
 
+# Quote arguments given as a string literal to pass to eval or shells
+# Taken from http://www.etalabs.net/sh_tricks.html
+quote() {
+  for i in "$@"; do
+    printf '%s\n' "$i" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/' \\\\/";
+  done;
+  echo " ";
+}
+
 # Ask the user with a y/n prompt
 read_reply() {
   # POSIX emulation of read -t
@@ -108,18 +117,15 @@ elif command -v "notepad++" >/dev/null; then
   }
 elif command -v "nano" >/dev/null; then
   launch_editor() {
-    filestr="$(printf '"%s" ' "$@")";
-    launch_terminal "nano -- $filestr";
+    launch_terminal "nano -- $(quote "$@")";
   }
 elif command -v "vim" >/dev/null; then
   launch_editor() {
-    filestr="$(printf '"%s" ' "$@")";
-    launch_terminal "vim -- $filestr";
+    launch_terminal "vim -- $(quote "$@")";
   }
 elif command -v "vi" >/dev/null; then
   launch_editor() {
-    filestr="$(printf '"%s" ' "$@")";
-    launch_terminal "vi -- $filestr";
+    launch_terminal "vi -- $(quote "$@")";
   }
 else
   abort "No known editor found!";
@@ -148,7 +154,7 @@ read_reply && {
   read -r ver;
   printf "${promptb} Please enter new {verc} value: ";
   read -r verc;
-  launch_terminal "cd '$mmgdir'" "./bump.sh '$ver' '$verc' '$(date -u +'%d %B, %Y')'" "git add conf/defconf-*.txt" "git commit -m 'Update confs'" "git push" "read REPLY" || abort "Could not commit confs!";
+  launch_terminal "cd '$mmgdir'" "./bump.sh $(quote "$ver" "$verc" "$(date -u +'%d %B, %Y')")" "git add conf/defconf-*.txt" "git commit -m 'Update confs'" "git push" "read REPLY" || abort "Could not commit confs!";
 }
 
 # Wait for update process
@@ -169,7 +175,7 @@ while true; do
   variants="0";
   for variant in $variantlist; do
     echo "${promptc} Running build for variant $variant...";
-    launch_terminal "cd '$mmgdir'" "./build.sh $variant" & pid_build="$pid_build $!";
+    launch_terminal "cd '$mmgdir'" "./build.sh $(quote "$variant")" & pid_build="$pid_build $!";
     variants="$(( variants + 1 ))";
   done;
 
@@ -249,7 +255,7 @@ read_reply && {
       echo;
       echo "${prompta} Updating and commiting changelog...";
       printf '### %s\n%s\n\n' "$name" "$changelog" | sed -i '2r /dev/stdin' "$reldir/CHANGELOG.md";
-      launch_terminal "cd '$reldir'" "git diff CHANGELOG.md" "git add CHANGELOG.md" "git commit -m 'Changelog: $name'" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
+      launch_terminal "cd '$reldir'" "git diff CHANGELOG.md" "git add CHANGELOG.md" "git commit -m $(quote "Changelog: $name")" "git push '$ghgit'" "git pull" "read REPLY" || abort "Could not commit changelog!";
     }
   }
   commit="$(git -C "$reldir" rev-parse HEAD)";
