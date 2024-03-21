@@ -50,9 +50,7 @@ deltadownload() {
         gitlab)
           objectid="$(echo "$objectpath" | jq -Rr "@uri")";
           [ "$objectid" ] || continue;
-          objectupload="$(curl -fs "https://gitlab.com/api/v4/projects/$objectid/repository/tags" | jq -r '.[].release.description' | grep -oE "(/uploads/[^()]*$objectarg)" | head -n1 | tr -d "()")";
-          [ "$objectupload" ] || continue;
-          objecturl="https://gitlab.com/$objectpath$objectupload";
+          objecturl="$(curl -fLs "https://gitlab.com/api/v4/projects/$objectid/releases" | jq --arg re "(?<=\()/uploads/[^\(\)]*(?=\))" --arg pre "https://gitlab.com/$objectpath" '[ .[] | { assets, description: [ .description | match($re; "g") | $pre + .string ] } ]' | jq -r '.[] | (.assets.links[].direct_asset_url, .description[])' | grep "$objectarg$" | head -n1)";
         ;;
         repo)
           objectrepo="$(dirname "$objectpath")";
