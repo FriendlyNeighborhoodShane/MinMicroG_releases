@@ -31,10 +31,8 @@ collections of software. So all the individual components of the zip obey
 their own licenses. The scripts that are part of MinMicroG are under GPLv3,
 under my copyright. Most of the included software is also free software,
 under license and copyright of their individual authors given in the zip's
-readme.
-
-Exception is the nonfree Google software that is packaged in the Standard and
-MinimalIAP edition zips.
+readme. Exceptions are the various nonfree binaries packaged in some variant
+zips.
 
 ### What's hidden inside contrib?
 Oh, nothing. Just a bunch of lazy scripts I use myself to make MinMicroG releases,
